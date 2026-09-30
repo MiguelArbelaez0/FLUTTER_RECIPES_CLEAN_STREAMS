@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_recipes_clean_streams/presentation/routes/routes_app.dart';
 
-void main() {
+import 'features/recipes/presentation/pages/routes_app.dart';
+
+import 'injection/injection_container.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  configureDependencies();
   runApp(const MyApp());
 }
 
