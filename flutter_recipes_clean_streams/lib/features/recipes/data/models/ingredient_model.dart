@@ -1,8 +1,10 @@
-import '../../domain/entities/recipe_entity.dart';
 import '../../../../core/utils/normalized_text.dart';
 
-class IngredientModel extends IngredientEntity {
-  const IngredientModel({required super.name, super.measure});
+class IngredientModel {
+  const IngredientModel({required this.name, this.measure});
+
+  final String name;
+  final String? measure;
 
   static IngredientModel? fromMealJson(Map<String, dynamic> json, int index) {
     final name = normalizedText(json['strIngredient$index']);

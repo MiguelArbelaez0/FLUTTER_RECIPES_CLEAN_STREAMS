@@ -37,8 +37,7 @@ class RecipeModel {
       imageUrl: normalizedText(json['strMealThumb']),
       ingredients: [
         for (var index = 1; index <= 20; index++)
-          if (IngredientModel.fromMealJson(json, index) case final ingredient?)
-            ingredient,
+          ?IngredientModel.fromMealJson(json, index),
       ],
     );
   }
