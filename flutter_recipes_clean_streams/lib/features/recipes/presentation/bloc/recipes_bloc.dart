@@ -3,7 +3,9 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/error/failures/failure.dart';
 import '../../domain/entities/recipe_entity.dart';
+import '../../domain/usecases/get_categories.dart';
 import '../../domain/usecases/get_random_recipe.dart';
+import '../../domain/usecases/get_recipes_by_category.dart';
 import '../../domain/usecases/get_recipe_detail.dart';
 import '../../domain/usecases/search_recipes.dart';
 import 'recipes_event.dart';
@@ -21,7 +23,19 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     required this.getRandomRecipe,
     required this.getRecipeDetail,
     required this.searchRecipes,
+    required this.getCategories,
+    required this.getRecipesByCategory,
   }) : super(const RecipesState()) {
+    on<LoadHome>((event, emit) {
+      add(const LoadCategories());
+      add(const LoadRandomRecipes());
+    });
+    on<RetryHome>((event, emit) {
+      add(const LoadCategories());
+      add(const LoadRandomRecipes(refresh: true));
+    });
+    on<LoadCategories>(_loadCategories);
+    on<LoadRecipesByCategory>(_loadByCategory);
     on<LoadRandomRecipes>(_loadRandom);
     on<LoadRecipeDetail>(_loadDetail);
     on<SearchRecipesRequested>(
@@ -32,6 +46,65 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
   final GetRandomRecipe getRandomRecipe;
   final GetRecipeDetail getRecipeDetail;
   final SearchRecipes searchRecipes;
+  final GetCategories getCategories;
+  final GetRecipesByCategory getRecipesByCategory;
+
+  Future<void> _loadCategories(
+    LoadCategories event,
+    Emitter<RecipesState> emit,
+  ) async {
+    emit(state.copyWith(categoriesStatus: CategoriesStatus.loading));
+    try {
+      final categories = await getCategories();
+      emit(
+        state.copyWith(
+          categoriesStatus: CategoriesStatus.success,
+          categories: categories,
+          categoryErrors: const {},
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          categoriesStatus: CategoriesStatus.failure,
+          errorMessage: _message(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadByCategory(
+    LoadRecipesByCategory event,
+    Emitter<RecipesState> emit,
+  ) async {
+    final category = event.category;
+    if (state.categoryLoading.contains(category) ||
+        state.categoryRecipes.containsKey(category)) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        categoryLoading: {...state.categoryLoading, category},
+        categoryErrors: {...state.categoryErrors}..remove(category),
+      ),
+    );
+    try {
+      final recipes = await getRecipesByCategory(category);
+      emit(
+        state.copyWith(
+          categoryRecipes: {...state.categoryRecipes, category: recipes},
+          categoryLoading: {...state.categoryLoading}..remove(category),
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          categoryLoading: {...state.categoryLoading}..remove(category),
+          categoryErrors: {...state.categoryErrors, category: _message(error)},
+        ),
+      );
+    }
+  }
 
   Future<void> _loadRandom(
     LoadRandomRecipes event,

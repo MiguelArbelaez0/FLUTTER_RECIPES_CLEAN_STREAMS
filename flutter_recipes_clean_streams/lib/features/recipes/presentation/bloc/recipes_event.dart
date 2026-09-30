@@ -13,6 +13,25 @@ class LoadRandomRecipes extends RecipesEvent {
   List<Object?> get props => [refresh];
 }
 
+class LoadHome extends RecipesEvent {
+  const LoadHome();
+}
+
+class LoadCategories extends RecipesEvent {
+  const LoadCategories();
+}
+
+class LoadRecipesByCategory extends RecipesEvent {
+  const LoadRecipesByCategory(this.category);
+  final String category;
+  @override
+  List<Object?> get props => [category];
+}
+
+class RetryHome extends RecipesEvent {
+  const RetryHome();
+}
+
 class SearchRecipesRequested extends RecipesEvent {
   const SearchRecipesRequested(this.query);
   final String query;

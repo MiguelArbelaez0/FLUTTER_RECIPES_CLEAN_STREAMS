@@ -77,4 +77,14 @@ class RecipeRemoteDataSourceImpl implements RecipeRemoteDataSource {
     );
     return _meals(response.data);
   });
+
+  @override
+  Future<List<RecipeModel>> getRecipesByCategory(String category) =>
+      _request(() async {
+        final response = await client.dio.get<Map<String, dynamic>>(
+          '/filter.php',
+          queryParameters: {'c': category},
+        );
+        return _meals(response.data);
+      });
 }

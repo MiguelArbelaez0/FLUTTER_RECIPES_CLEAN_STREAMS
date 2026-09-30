@@ -8,12 +8,18 @@ import 'package:flutter_recipes_clean_streams/core/error/failures/failure.dart';
 import 'package:flutter_recipes_clean_streams/core/network/api_client.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/data/datasources/recipe_remote_data_source.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/data/datasources/recipe_remote_data_source_impl.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/data/datasources/category_remote_data_source.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/data/datasources/category_remote_data_source_impl.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/data/models/recipe_model.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/data/models/category_model.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/data/repositories/recipe_repository_impl.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/domain/entities/recipe_entity.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/domain/entities/category_entity.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/domain/repositories/recipe_repository.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/domain/usecases/get_random_recipe.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/domain/usecases/get_recipe_detail.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/domain/usecases/get_categories.dart';
+import 'package:flutter_recipes_clean_streams/features/recipes/domain/usecases/get_recipes_by_category.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/domain/usecases/search_recipes.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/presentation/bloc/recipes_bloc.dart';
 import 'package:flutter_recipes_clean_streams/features/recipes/presentation/bloc/recipes_event.dart';
@@ -45,6 +51,11 @@ class _FakeRemote implements RecipeRemoteDataSource {
   @override
   Future<List<RecipeModel>> searchRecipes(String query) async =>
       emptySearch ? [] : [recipe];
+
+  @override
+  Future<List<RecipeModel>> getRecipesByCategory(String category) async => [
+    recipe,
+  ];
 }
 
 class _FakeRepository implements RecipeRepository {
@@ -60,6 +71,20 @@ class _FakeRepository implements RecipeRepository {
   @override
   Future<List<RecipeEntity>> searchRecipes(String query) async =>
       emptySearch ? [] : [recipe];
+
+  @override
+  Future<List<CategoryEntity>> getCategories() async => const [
+    CategoryEntity(
+      id: '1',
+      name: 'Chicken',
+      imageUrl: 'https://example.com/chicken.jpg',
+    ),
+  ];
+
+  @override
+  Future<List<RecipeEntity>> getRecipesByCategory(String category) async => [
+    recipe,
+  ];
 }
 
 class _MultiRandomRepository extends _FakeRepository {
@@ -115,6 +140,24 @@ RecipeRemoteDataSourceImpl _dataSource(_StaticAdapter adapter) {
   return RecipeRemoteDataSourceImpl(ApiClient(dio: dio));
 }
 
+CategoryRemoteDataSourceImpl _categoryDataSource(_StaticAdapter adapter) {
+  final dio = Dio(
+    BaseOptions(baseUrl: 'https://www.themealdb.com/api/json/v1/1'),
+  )..httpClientAdapter = adapter;
+  return CategoryRemoteDataSourceImpl(ApiClient(dio: dio));
+}
+
+class _FakeCategoryRemote implements CategoryRemoteDataSource {
+  @override
+  Future<List<CategoryModel>> getCategories() async => const [
+    CategoryModel(
+      id: '1',
+      name: 'Chicken',
+      imageUrl: 'https://example.com/chicken.jpg',
+    ),
+  ];
+}
+
 void main() {
   test('RecipeModel converts TheMealDB fields to clean entities', () {
     final model = RecipeModel.fromJson(_meal);
@@ -166,6 +209,39 @@ void main() {
     expect(detail.name, 'Chicken Handi');
   });
 
+  test('categories and category filter use TheMealDB endpoints', () async {
+    final categoriesAdapter = _StaticAdapter({
+      'categories': [
+        {
+          'idCategory': '1',
+          'strCategory': 'Chicken',
+          'strCategoryDescription': 'Chicken dishes',
+          'strCategoryThumb': 'https://www.themealdb.com/chicken.jpg',
+        },
+      ],
+    });
+    final categories = await _categoryDataSource(categoriesAdapter)
+        .getCategories();
+    expect(categories.single.toEntity().name, 'Chicken');
+    expect(categories.single.toEntity().imageUrl, contains('themealdb.com'));
+    expect(categoriesAdapter.lastRequest?.path, '/categories.php');
+
+    final filterAdapter = _StaticAdapter({
+      'meals': [
+        {
+          'idMeal': '52795',
+          'strMeal': 'Chicken Handi',
+          'strMealThumb': 'https://example.com/meal.jpg',
+        },
+      ],
+    });
+    final recipes = await _dataSource(filterAdapter)
+        .getRecipesByCategory('Chicken');
+    expect(recipes.single.name, 'Chicken Handi');
+    expect(filterAdapter.lastRequest?.path, '/filter.php');
+    expect(filterAdapter.lastRequest?.queryParameters['c'], 'Chicken');
+  });
+
   test(
     'datasource maps transport, HTTP, malformed and missing-meal errors',
     () async {
@@ -189,10 +265,16 @@ void main() {
   );
 
   test('repository translates datasource failures and entities', () async {
-    final repository = RecipeRepositoryImpl(_FakeRemote());
+    final repository = RecipeRepositoryImpl(
+      _FakeRemote(),
+      _FakeCategoryRemote(),
+    );
     expect((await repository.getRandomRecipe()).name, 'Chicken Handi');
 
-    final failing = RecipeRepositoryImpl(_FailingRemote());
+    final failing = RecipeRepositoryImpl(
+      _FailingRemote(),
+      _FailingCategoryRemote(),
+    );
     expect(failing.getRandomRecipe(), throwsA(isA<NetworkFailure>()));
   });
 
@@ -204,6 +286,11 @@ void main() {
       (await SearchRecipes(repository)('Chicken')).single.name,
       'Chicken Handi',
     );
+    expect((await GetCategories(repository)()).single.name, 'Chicken');
+    expect(
+      (await GetRecipesByCategory(repository)('Chicken')).single.name,
+      'Chicken Handi',
+    );
   });
 
   test('BLoC emits random, search, no-results and detail states', () async {
@@ -212,6 +299,8 @@ void main() {
       getRandomRecipe: GetRandomRecipe(repository),
       getRecipeDetail: GetRecipeDetail(repository),
       searchRecipes: SearchRecipes(repository),
+      getCategories: GetCategories(repository),
+      getRecipesByCategory: GetRecipesByCategory(repository),
     );
     final states = <RecipesState>[];
     final subscription = bloc.stream.listen(states.add);
@@ -224,6 +313,10 @@ void main() {
     bloc.add(const SearchRecipesRequested('No match'));
     await Future<void>.delayed(const Duration(milliseconds: 400));
     bloc.add(const LoadRecipeDetail('52795'));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    bloc.add(const LoadCategories());
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    bloc.add(const LoadRecipesByCategory('Chicken'));
     await Future<void>.delayed(const Duration(milliseconds: 20));
 
     expect(
@@ -238,6 +331,14 @@ void main() {
       isTrue,
     );
     expect(states.any((s) => s.selectedRecipe?.id == '52795'), isTrue);
+    expect(
+      states.any((s) => s.categories.any((c) => c.name == 'Chicken')),
+      isTrue,
+    );
+    expect(
+      states.any((s) => s.categoryRecipes['Chicken']?.isNotEmpty == true),
+      isTrue,
+    );
 
     await subscription.cancel();
     await bloc.close();
@@ -251,6 +352,8 @@ void main() {
         getRandomRecipe: GetRandomRecipe(repository),
         getRecipeDetail: GetRecipeDetail(repository),
         searchRecipes: SearchRecipes(repository),
+        getCategories: GetCategories(repository),
+        getRecipesByCategory: GetRecipesByCategory(repository),
       );
       final completed = bloc.stream.firstWhere(
         (state) =>
@@ -281,5 +384,15 @@ class _FailingRemote implements RecipeRemoteDataSource {
 
   @override
   Future<List<RecipeModel>> searchRecipes(String query) async =>
+      throw const NetworkException('offline');
+
+  @override
+  Future<List<RecipeModel>> getRecipesByCategory(String category) async =>
+      throw const NetworkException('offline');
+}
+
+class _FailingCategoryRemote implements CategoryRemoteDataSource {
+  @override
+  Future<List<CategoryModel>> getCategories() async =>
       throw const NetworkException('offline');
 }

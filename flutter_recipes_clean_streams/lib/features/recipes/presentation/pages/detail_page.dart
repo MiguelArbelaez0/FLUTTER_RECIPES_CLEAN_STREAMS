@@ -198,17 +198,82 @@ class _RecipeDetails extends StatelessWidget {
             const SizedBox(height: 27),
             const _SectionHeading(title: 'Preparación'),
             const SizedBox(height: 12),
-            Text(
-              recipe.instructions?.trim().isNotEmpty == true
-                  ? recipe.instructions!.trim()
-                  : 'No hay instrucciones disponibles.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            _InstructionSteps(instructions: recipe.instructions?.trim() ?? ''),
           ],
         ),
       ),
     ],
   );
+}
+
+class _InstructionSteps extends StatelessWidget {
+  const _InstructionSteps({required this.instructions});
+  final String instructions;
+
+  @override
+  Widget build(BuildContext context) {
+    if (instructions.isEmpty) {
+      return Text(
+        'No hay instrucciones disponibles.',
+        style: Theme.of(context).textTheme.bodyLarge,
+      );
+    }
+    var steps = instructions
+        .replaceAll('\r', '')
+        .split(RegExp(r'\n+'))
+        .map((step) => step.trim())
+        .where((step) => step.isNotEmpty)
+        .toList();
+    if (steps.length == 1) {
+      final sentences = steps.single
+          .split(RegExp(r'(?<=[.!?])\s+'))
+          .where((step) => step.trim().isNotEmpty)
+          .toList();
+      if (sentences.length > 1) steps = sentences;
+    }
+    return Column(
+      children: [
+        for (var index = 0; index < steps.length; index++)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: AppPalette.surface,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 29,
+                  height: 29,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppPalette.primarySoft,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(
+                      color: AppPalette.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    steps[index],
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class _RoundAction extends StatelessWidget {

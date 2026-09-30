@@ -4,9 +4,13 @@ import 'package:get_it/get_it.dart';
 import '../core/network/api_client.dart';
 import '../features/recipes/data/datasources/recipe_remote_data_source.dart';
 import '../features/recipes/data/datasources/recipe_remote_data_source_impl.dart';
+import '../features/recipes/data/datasources/category_remote_data_source.dart';
+import '../features/recipes/data/datasources/category_remote_data_source_impl.dart';
 import '../features/recipes/data/repositories/recipe_repository_impl.dart';
 import '../features/recipes/domain/repositories/recipe_repository.dart';
 import '../features/recipes/domain/usecases/get_random_recipe.dart';
+import '../features/recipes/domain/usecases/get_categories.dart';
+import '../features/recipes/domain/usecases/get_recipes_by_category.dart';
 import '../features/recipes/domain/usecases/get_recipe_detail.dart';
 import '../features/recipes/domain/usecases/search_recipes.dart';
 import '../features/recipes/presentation/bloc/recipes_bloc.dart';
@@ -18,10 +22,20 @@ void configureDependencies() {
   getIt.registerLazySingleton<RecipeRemoteDataSource>(
     () => RecipeRemoteDataSourceImpl(getIt<ApiClient>()),
   );
+  getIt.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
   getIt.registerLazySingleton<RecipeRepository>(
-    () => RecipeRepositoryImpl(getIt<RecipeRemoteDataSource>()),
+    () => RecipeRepositoryImpl(
+      getIt<RecipeRemoteDataSource>(),
+      getIt<CategoryRemoteDataSource>(),
+    ),
   );
   getIt.registerLazySingleton(() => GetRandomRecipe(getIt<RecipeRepository>()));
+  getIt.registerLazySingleton(() => GetCategories(getIt<RecipeRepository>()));
+  getIt.registerLazySingleton(
+    () => GetRecipesByCategory(getIt<RecipeRepository>()),
+  );
   getIt.registerLazySingleton(() => GetRecipeDetail(getIt<RecipeRepository>()));
   getIt.registerLazySingleton(() => SearchRecipes(getIt<RecipeRepository>()));
   getIt.registerFactory(
@@ -29,6 +43,8 @@ void configureDependencies() {
       getRandomRecipe: getIt(),
       getRecipeDetail: getIt(),
       searchRecipes: getIt(),
+      getCategories: getIt(),
+      getRecipesByCategory: getIt(),
     ),
   );
 }
