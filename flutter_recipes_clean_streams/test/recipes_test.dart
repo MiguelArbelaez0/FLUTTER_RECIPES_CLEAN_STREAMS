@@ -62,6 +62,17 @@ class _FakeRepository implements RecipeRepository {
       emptySearch ? [] : [recipe];
 }
 
+class _MultiRandomRepository extends _FakeRepository {
+  int randomCalls = 0;
+
+  @override
+  Future<RecipeEntity> getRandomRecipe() async {
+    final request = randomCalls++;
+    if (request == 1) throw StateError('one random request failed');
+    return RecipeEntity(id: '$request', name: 'Meal $request');
+  }
+}
+
 class _StaticAdapter implements HttpClientAdapter {
   _StaticAdapter(this.body, {this.statusCode = 200, this.failNetwork = false});
 
@@ -231,6 +242,32 @@ void main() {
     await subscription.cancel();
     await bloc.close();
   });
+
+  test(
+    'BLoC collects six random recipes and tolerates a failed request',
+    () async {
+      final repository = _MultiRandomRepository();
+      final bloc = RecipesBloc(
+        getRandomRecipe: GetRandomRecipe(repository),
+        getRecipeDetail: GetRecipeDetail(repository),
+        searchRecipes: SearchRecipes(repository),
+      );
+      final completed = bloc.stream.firstWhere(
+        (state) =>
+            state.status == RecipesStatus.success ||
+            state.status == RecipesStatus.failure,
+      );
+
+      bloc.add(const LoadRandomRecipes());
+      final state = await completed;
+
+      expect(state.status, RecipesStatus.success);
+      expect(state.recipes, hasLength(6));
+      expect(repository.randomCalls, 9);
+
+      await bloc.close();
+    },
+  );
 }
 
 class _FailingRemote implements RecipeRemoteDataSource {

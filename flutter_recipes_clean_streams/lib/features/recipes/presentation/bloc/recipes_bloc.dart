@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/error/failures/failure.dart';
+import '../../domain/entities/recipe_entity.dart';
 import '../../domain/usecases/get_random_recipe.dart';
 import '../../domain/usecases/get_recipe_detail.dart';
 import '../../domain/usecases/search_recipes.dart';
@@ -12,6 +13,10 @@ EventTransformer<E> _debounce<E>(Duration duration) =>
     (events, mapper) => events.debounce(duration).switchMap(mapper);
 
 class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
+  static const _randomRecipeTarget = 6;
+  static const _maxRandomRequests = 9;
+  static const _randomRequestBatchSize = 3;
+
   RecipesBloc({
     required this.getRandomRecipe,
     required this.getRecipeDetail,
@@ -32,22 +37,56 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     LoadRandomRecipes event,
     Emitter<RecipesState> emit,
   ) async {
+    if (state.status == RecipesStatus.loading) return;
+
     emit(state.copyWith(status: RecipesStatus.loading, clearError: true));
-    try {
-      emit(
-        state.copyWith(
-          status: RecipesStatus.success,
-          recipes: [await getRandomRecipe()],
-          clearError: true,
-        ),
+
+    final recipes = <RecipeEntity>[];
+    final recipeIds = <String>{};
+    var requestsMade = 0;
+
+    while (recipes.length < _randomRecipeTarget &&
+        requestsMade < _maxRandomRequests) {
+      final remainingRequests = _maxRandomRequests - requestsMade;
+      final batchSize = remainingRequests < _randomRequestBatchSize
+          ? remainingRequests
+          : _randomRequestBatchSize;
+      final batch = await Future.wait(
+        List.generate(batchSize, (_) => _loadRandomSafely()),
       );
-    } catch (error) {
+      requestsMade += batchSize;
+
+      for (final recipe in batch) {
+        if (recipes.length >= _randomRecipeTarget) break;
+        if (recipe != null && recipeIds.add(recipe.id)) recipes.add(recipe);
+      }
+    }
+
+    if (recipes.isEmpty) {
       emit(
         state.copyWith(
           status: RecipesStatus.failure,
-          errorMessage: _message(error),
+          errorMessage:
+              'Could not load recipes. Check your connection and retry.',
         ),
       );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        status: RecipesStatus.success,
+        recipes: recipes,
+        clearError: true,
+      ),
+    );
+  }
+
+  Future<RecipeEntity?> _loadRandomSafely() async {
+    try {
+      return await getRandomRecipe();
+    } catch (_) {
+      return null;
     }
   }
 

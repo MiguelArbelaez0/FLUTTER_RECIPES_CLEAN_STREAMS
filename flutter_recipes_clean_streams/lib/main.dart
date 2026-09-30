@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+
 import 'features/recipes/presentation/pages/routes_app.dart';
 
 import 'injection/injection_container.dart';
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Recipe Search',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: AppTheme.light,
       onGenerateRoute: Routes.generateRoute,
     );
   }
