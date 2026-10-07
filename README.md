@@ -1,10 +1,10 @@
 # Flutter Recipes Clean Streams
 
-A Flutter application for discovering and searching recipes, built with Flutter and Dart using Clean Architecture principles, BLoC/Streams for reactive state management, dependency injection, and REST API integration.
+A Flutter recipe discovery application built with Flutter and Dart, using Clean Architecture principles, BLoC/Streams for reactive state management, dependency injection, and REST API integration.
 
 ## 📱 Overview
 
-Flutter Recipes Clean Streams is a recipe discovery application focused on clean separation of responsibilities and reactive data flows.
+Flutter Recipes Clean Streams is a recipe discovery application focused on clean separation of responsibilities, reactive data flows, and efficient API-driven search.
 
 The project integrates the TheMealDB API and demonstrates how user input can be processed through a debounced stream before reaching the application and data layers.
 
@@ -69,7 +69,7 @@ Remote Data Source
 TheMealDB API
 ```
 
-Debouncing prevents unnecessary API requests while the user is typing and provides a cleaner reactive search experience.
+Debouncing reduces unnecessary API requests while the user is typing and provides a cleaner, more efficient reactive search experience.
 
 ## 🧩 Technologies
 
@@ -197,13 +197,15 @@ This project demonstrates practical experience with:
 
 ## 📌 Project Status
 
-The project is a completed academic/personal development project created to practice production-oriented Flutter architecture, reactive programming, and API-driven application development.
+**Completed portfolio project.**
+
+The project was developed to demonstrate production-oriented Flutter architecture, reactive programming with Streams/BLoC, API integration, dependency injection, and testable application design.
 
 ## 👨‍💻 Author
 
 **Miguel Arbeláez Vallejo**
 
-Software Developer | Flutter / Dart | Full-Stack Development
+Software Developer | Flutter & Dart | Full-Stack | Backend | AI/Data
 
 - GitHub: https://github.com/MiguelArbelaez0
 - LinkedIn: https://www.linkedin.com/in/miguel-arbelaez-v-57719542b/
