@@ -1,58 +1,54 @@
 # Flutter Recipes Clean Streams
 
-A Flutter recipe discovery application built with Flutter and Dart, using Clean Architecture principles, BLoC/Streams for reactive state management, dependency injection, and REST API integration.
+Aplicación móvil desarrollada con Flutter y Dart para descubrir y buscar recetas, utilizando principios de Clean Architecture, BLoC/Streams, inyección de dependencias e integración con una API REST.
 
-## 📱 Overview
+## 📱 Descripción general
 
-Flutter Recipes Clean Streams is a recipe discovery application focused on clean separation of responsibilities, reactive data flows, and efficient API-driven search.
+Flutter Recipes Clean Streams es una aplicación centrada en el descubrimiento de recetas, la separación de responsabilidades y el procesamiento reactivo de búsquedas.
 
-The project integrates the TheMealDB API and demonstrates how user input can be processed through a debounced stream before reaching the application and data layers.
+El proyecto integra la API de TheMealDB y procesa la entrada del usuario mediante un flujo con debounce antes de llegar a las capas de aplicación y datos.
 
-## 🏗️ Architecture
-
-The application follows a Clean Architecture-inspired structure:
+## 🏗️ Arquitectura
 
 ```text
-Presentation
+Presentación
      ↓
 BLoC / Streams
      ↓
-Use Case
+Caso de uso
      ↓
-Repository
+Repositorio
      ↓
-Remote Data Source
+Fuente de datos remota
      ↓
 Dio
      ↓
-TheMealDB API
+API de TheMealDB
 ```
 
-This approach separates the user interface, business logic, domain rules, and external data access.
+La estructura separa interfaz, lógica de negocio, reglas de dominio y acceso a servicios externos.
 
-## 🚀 Features
+## 🚀 Funcionalidades
 
-- Recipe discovery
-- Recipe search
-- Reactive search using Streams
-- Search input debouncing
-- REST API integration
-- Responsive interface
-- BLoC-based state management
-- Repository Pattern
-- Use Case layer
-- Dependency injection
-- Error and loading state handling
-- Unit and application-level testing
+- Descubrimiento de recetas.
+- Búsqueda de recetas.
+- Búsqueda reactiva con Streams.
+- Debounce de la búsqueda.
+- Integración con API REST.
+- Interfaz adaptable.
+- Gestión de estado con BLoC.
+- Repository Pattern.
+- Capa de casos de uso.
+- Inyección de dependencias.
+- Manejo de errores y estados de carga.
+- Pruebas unitarias y de aplicación.
 
-## 🔎 Reactive Search
+## 🔎 Búsqueda reactiva
 
-One of the main technical aspects of the project is the use of Streams to process search input.
-
-The search flow can be represented as:
+El proyecto utiliza Streams para procesar la entrada de búsqueda:
 
 ```text
-User Input
+Entrada del usuario
     ↓
 Stream
     ↓
@@ -60,99 +56,89 @@ Debounce
     ↓
 BLoC
     ↓
-Use Case
+Caso de uso
     ↓
-Repository
+Repositorio
     ↓
-Remote Data Source
+Fuente de datos remota
     ↓
-TheMealDB API
+API de TheMealDB
 ```
 
-Debouncing reduces unnecessary API requests while the user is typing and provides a cleaner, more efficient reactive search experience.
+El debounce reduce solicitudes innecesarias mientras el usuario escribe y mejora la eficiencia de la búsqueda.
 
-## 🧩 Technologies
+## 🧩 Tecnologías
 
-| Technology | Usage |
+| Tecnología | Uso |
 |---|---|
-| Flutter | Application framework |
-| Dart | Programming language |
-| flutter_bloc | State management |
-| BLoC | Reactive application logic |
-| Streams | Reactive data processing |
-| Dio | HTTP client |
-| GetIt | Dependency injection |
-| Equatable | Value equality |
-| TheMealDB API | Recipe data |
-| Clean Architecture | Application organization |
-| Repository Pattern | Data abstraction |
+| Flutter | Desarrollo de la aplicación |
+| Dart | Lenguaje de programación |
+| flutter_bloc | Gestión de estado |
+| BLoC | Lógica reactiva |
+| Streams | Procesamiento reactivo |
+| Dio | Cliente HTTP |
+| GetIt | Inyección de dependencias |
+| Equatable | Comparación de valores |
+| TheMealDB API | Datos de recetas |
+| Clean Architecture | Organización de la aplicación |
+| Repository Pattern | Abstracción de datos |
 
-## 🌐 API Integration
+## 🌐 Integración con la API
 
-The application consumes the public TheMealDB API to retrieve recipe information.
+La aplicación consume la API pública de TheMealDB para obtener información de recetas.
 
-The API communication is isolated from the presentation layer through the repository and data-source layers.
+La comunicación se encuentra aislada de la presentación mediante las capas de repositorio y fuente de datos.
 
-This makes the external service easier to replace, test, and maintain without coupling the UI directly to HTTP requests.
+## ⚡ Gestión de estado
 
-## ⚡ State Management
+BLoC coordina el flujo entre presentación y las capas de dominio y datos.
 
-BLoC is used to manage application state and coordinate the flow between the presentation layer and the domain/data layers.
+Estados habituales:
 
-Typical states include:
+- Inicial.
+- Cargando.
+- Resultados exitosos.
+- Sin resultados.
+- Error.
 
-- Initial state
-- Loading
-- Successful results
-- Empty results
-- Error state
+La interfaz reacciona a los cambios de estado sin controlar directamente las operaciones de la API.
 
-The UI reacts to state changes instead of directly controlling API operations.
+## 💉 Inyección de dependencias
 
-## 💉 Dependency Injection
+`GetIt` registra y resuelve las dependencias de la aplicación, centralizando su configuración y reduciendo el acoplamiento.
 
-`GetIt` is used to register and resolve application dependencies.
+## 📱 Interfaz adaptable
 
-This keeps dependency creation centralized and reduces direct coupling between application components.
+La aplicación está preparada para diferentes tamaños de pantalla, incluyendo dispositivos móviles, tabletas y escritorio.
 
-## 📱 Responsive UI
+## 🧪 Pruebas
 
-The application is designed to adapt to different screen sizes, including mobile, tablet, and desktop layouts.
+El proyecto incluye pruebas de componentes y funcionalidades principales.
 
-The UI separates reusable widgets from screen-level components to keep the presentation layer maintainable.
+La separación proporcionada por Clean Architecture, repositorios y casos de uso facilita las pruebas independientes.
 
-## 🧪 Testing
+## ⚙️ Instalación
 
-The project includes tests for application components and core functionality.
-
-The separation provided by Clean Architecture, repositories, and use cases makes individual layers easier to test independently.
-
-## ⚙️ Installation
-
-### 1. Clone the repository
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/MiguelArbelaez0/FLUTTER_RECIPES_CLEAN_STREAMS.git
 cd FLUTTER_RECIPES_CLEAN_STREAMS
 ```
 
-### 2. Install dependencies
+### 2. Instalar dependencias
 
 ```bash
 flutter pub get
 ```
 
-### 3. Run the application
+### 3. Ejecutar
 
 ```bash
 flutter run
 ```
 
-Make sure Flutter and Dart are correctly installed and configured on your development environment.
-
-## 📂 Project Structure
-
-The project separates responsibilities across the main application layers:
+## 📂 Estructura
 
 ```text
 lib/
@@ -162,50 +148,41 @@ lib/
 └── presentation/
 ```
 
-### Presentation
+### Presentación
+Pantallas, widgets, BLoC y lógica reactiva de la interfaz.
 
-Contains screens, widgets, BLoCs, and reactive UI logic.
+### Dominio
+Entidades, contratos de repositorio y casos de uso.
 
-### Domain
-
-Contains business logic, entities, repository contracts, and use cases.
-
-### Data
-
-Contains API communication, data sources, models, and repository implementations.
+### Datos
+Comunicación con la API, fuentes de datos, modelos e implementaciones de repositorios.
 
 ### Core
+Funcionalidades compartidas y utilidades de la aplicación.
 
-Contains shared functionality and application-level utilities.
+## 🎯 Qué demuestra este proyecto
 
-## 🎯 What This Project Demonstrates
+- Flutter y Dart.
+- BLoC y Streams.
+- Principios de Clean Architecture.
+- Repository Pattern.
+- Diseño mediante casos de uso.
+- Integración con APIs REST.
+- Dio.
+- Inyección de dependencias con GetIt.
+- Debounce de búsquedas.
+- Interfaces adaptables.
+- Manejo de errores y estados.
+- Pruebas.
 
-This project demonstrates practical experience with:
+## 📌 Estado del proyecto
 
-- Flutter and Dart
-- BLoC and reactive Streams
-- Clean Architecture principles
-- Repository Pattern
-- Use Case design
-- REST API integration
-- Dio
-- Dependency injection with GetIt
-- Search debouncing
-- Responsive UI development
-- Error and state handling
-- Testing
+**Proyecto de portafolio terminado.**
 
-## 📌 Project Status
+Desarrollado para demostrar arquitectura mantenible en Flutter, programación reactiva con Streams/BLoC, integración con APIs, inyección de dependencias y diseño orientado a pruebas.
 
-**Completed portfolio project.**
-
-The project was developed to demonstrate production-oriented Flutter architecture, reactive programming with Streams/BLoC, API integration, dependency injection, and testable application design.
-
-## 👨‍💻 Author
+## 👨‍💻 Autor
 
 **Miguel Arbeláez Vallejo**
 
-Software Developer | Flutter & Dart | Full-Stack | Backend | AI/Data
-
-- GitHub: https://github.com/MiguelArbelaez0
-- LinkedIn: https://www.linkedin.com/in/miguel-arbelaez-v-57719542b/
+Desarrollador de Software | Flutter y Dart | Desarrollo integral | Backend | IA y Datos
