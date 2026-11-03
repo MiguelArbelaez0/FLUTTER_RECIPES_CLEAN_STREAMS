@@ -73,12 +73,12 @@ El script guarda ajustes ignorados por Git en `.tooling/`, ejecuta Flutter desde
 
 ## Plataformas
 
-- Web: compilación release e inicio con `flutter run -d chrome` verificados. La interacción visual en Chrome sigue pendiente.
+- Web: compilación release verificada. El inicio y la búsqueda con datos reales se comprobaron manualmente en Chrome mediante capturas. El usuario confirmó que la navegación por categorías y el detalle de recetas funcionan.
 - Android: compilación APK debug verificada con JDK 17. En emulador Android 16/API 36 una comprobación automatizada con el repositorio real verificó descubrimiento, categorías, búsqueda, resultados vacíos, detalle con ingredientes e instrucciones y retorno a inicio. Las pruebas deterministas de integración cubren navegación y recuperación de errores con datos simulados.
 - Widgets: inicio, búsqueda, detalle y retorno probados en tres tamaños de pantalla.
 - iOS, macOS, Linux y Windows: existen carpetas de plataforma; compilación y ejecución no verificadas.
 
-La compilación por sí sola no verifica interacción ni conectividad en un dispositivo. La validación de interacción en Chrome continúa pendiente. La disponibilidad del servicio externo debe comprobarse al ejecutar la aplicación.
+La compilación por sí sola no verifica interacción ni conectividad en un dispositivo. Las comprobaciones manuales en Chrome no constituyen una suite automatizada de navegador. La disponibilidad de TheMealDB sigue siendo intermitente y debe comprobarse al ejecutar la aplicación.
 
 ## Limitaciones
 
