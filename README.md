@@ -62,7 +62,7 @@ flutter build web
 flutter build apk --debug
 ```
 
-Las pruebas cubren JSON y datos inválidos, casos de uso, repositorios con adaptadores HTTP simulados, timeouts, debounce con reloj de pruebas, cancelación real del transporte, búsquedas consecutivas, respuestas obsoletas, reintentos de categorías, descubrimiento y navegación al detalle. No requieren una API externa activa. La prueba de integración también utiliza datos simulados y no certifica la disponibilidad del servicio.
+Las pruebas cubren JSON y datos inválidos, casos de uso, repositorios con adaptadores HTTP simulados, timeouts, debounce con reloj de pruebas, cancelación real del transporte, búsquedas consecutivas, respuestas obsoletas, reintentos de categorías, descubrimiento, marcas temporales de recetas y navegación al detalle. No requieren una API externa activa. La prueba de integración también utiliza datos simulados y no certifica la disponibilidad del servicio.
 
 Para Android se necesita un SDK con las licencias correspondientes y un JDK compatible con Gradle 8.14/AGP 8.11.1. La selección de Java puede aislarse por proceso con `scripts/flutter-local.ps1` desde la raíz del repositorio:
 ```powershell
@@ -73,16 +73,17 @@ El script guarda ajustes ignorados por Git en `.tooling/`, ejecuta Flutter desde
 
 ## Plataformas
 
-- Web: compilación release verificada.
-- Android: compilación APK debug verificada con JDK 17; prueba de integración ejecutada en emulador Android 16/API 36 con datos simulados.
+- Web: compilación release e inicio con `flutter run -d chrome` verificados. La interacción visual en Chrome sigue pendiente.
+- Android: compilación APK debug verificada con JDK 17. En emulador Android 16/API 36 una comprobación automatizada con el repositorio real verificó descubrimiento, categorías, búsqueda, resultados vacíos, detalle con ingredientes e instrucciones y retorno a inicio. Las pruebas deterministas de integración cubren navegación y recuperación de errores con datos simulados.
 - Widgets: inicio, búsqueda, detalle y retorno probados en tres tamaños de pantalla.
 - iOS, macOS, Linux y Windows: existen carpetas de plataforma; compilación y ejecución no verificadas.
 
-La compilación por sí sola no verifica interacción ni conectividad en un dispositivo. La validación manual completa con la API real en Chrome y Android queda pendiente.
+La compilación por sí sola no verifica interacción ni conectividad en un dispositivo. La validación de interacción en Chrome continúa pendiente. La disponibilidad del servicio externo debe comprobarse al ejecutar la aplicación.
 
 ## Limitaciones
 
 - TheMealDB puede devolver información incompleta o en inglés. No se traducen recetas.
+- El servicio externo puede responder con HTTP 522, timeouts o transferencias incompletas. La aplicación muestra errores y permite reintentar; una ejecución satisfactoria no garantiza disponibilidad continua.
 - No hay almacenamiento offline, autenticación, paginación ni biblioteca de favoritos persistente. Los corazones son marcas locales de cada widget y se reinician al recrearlo.
 - El descubrimiento intenta hasta nueve solicitudes para reunir seis recetas distintas; puede mostrar menos si hay duplicados o fallos.
 - Las listas de categorías se conservan solo durante la pantalla y no se persisten en disco.
