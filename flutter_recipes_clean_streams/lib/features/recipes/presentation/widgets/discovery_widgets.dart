@@ -27,26 +27,35 @@ class HomeHeader extends StatelessWidget {
         child: const Icon(Icons.restaurant_menu_rounded, color: Colors.white),
       ),
       const SizedBox(width: 12),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Sazón', style: Theme.of(context).textTheme.titleLarge),
-          Text(
-            'RECETAS PARA DISFRUTAR',
-            style: Theme.of(context).textTheme.labelSmall
-                ?.copyWith(color: AppPalette.muted, letterSpacing: 1.1),
-          ),
-        ],
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Sazón', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'RECETAS PARA DISFRUTAR',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: AppPalette.muted, letterSpacing: 1.1),
+            ),
+          ],
+        ),
       ),
-      const Spacer(),
+
       Container(
         decoration: const BoxDecoration(
           color: AppPalette.surface,
           shape: BoxShape.circle,
         ),
         child: IconButton(
-          tooltip: 'Tu perfil',
-          onPressed: () {},
+          tooltip: 'Acerca de Sazón',
+          onPressed: () => showAboutDialog(
+            context: context,
+            applicationName: 'Sazón',
+            applicationVersion: '1.0.0',
+            children: [const Text('Descubre recetas con TheMealDB.')],
+          ),
           icon: const Icon(Icons.person_outline_rounded),
         ),
       ),

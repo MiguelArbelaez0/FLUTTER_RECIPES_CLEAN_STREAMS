@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions/exceptions.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_exception.dart';
 import '../models/category_model.dart';
 import 'category_remote_data_source.dart';
 
@@ -31,16 +32,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
           .where((category) => category.name.isNotEmpty)
           .toList();
     } on DioException catch (error) {
-      if (error.response == null ||
-          error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout ||
-          error.type == DioExceptionType.sendTimeout ||
-          error.type == DioExceptionType.connectionError) {
-        throw NetworkException(error.message ?? 'Network request failed.');
-      }
-      throw ServerException(
-        'TheMealDB returned HTTP ${error.response?.statusCode ?? 'error'}.',
-      );
+      throw apiException(error);
     } on TypeError catch (error) {
       throw ParsingException(error.toString());
     } on FormatException catch (error) {

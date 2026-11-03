@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_recipes_clean_streams/core/utils/request_cancellation.dart';
 
 import '../../../../core/error/exceptions/exceptions.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_exception.dart';
 import '../models/recipe_model.dart';
 import 'recipe_remote_data_source.dart';
 
@@ -14,16 +16,7 @@ class RecipeRemoteDataSourceImpl implements RecipeRemoteDataSource {
     try {
       return await action();
     } on DioException catch (error) {
-      if (error.response == null ||
-          error.type == DioExceptionType.connectionTimeout ||
-          error.type == DioExceptionType.receiveTimeout ||
-          error.type == DioExceptionType.sendTimeout ||
-          error.type == DioExceptionType.connectionError) {
-        throw NetworkException(error.message ?? 'Network request failed.');
-      }
-      throw ServerException(
-        'TheMealDB returned HTTP ${error.response?.statusCode ?? 'error'}.',
-      );
+      throw apiException(error);
     } on FormatException catch (error) {
       throw ParsingException(error.message);
     } on TypeError catch (error) {
@@ -70,9 +63,15 @@ class RecipeRemoteDataSourceImpl implements RecipeRemoteDataSource {
   });
 
   @override
-  Future<List<RecipeModel>> searchRecipes(String query) => _request(() async {
+  Future<List<RecipeModel>> searchRecipes(
+    String query, {
+    RequestCancellation? cancellation,
+  }) => _request(() async {
+    final token = CancelToken();
+    cancellation?.onCancel(() => token.cancel());
     final response = await client.dio.get<Map<String, dynamic>>(
       '/search.php',
+      cancelToken: token,
       queryParameters: {'s': query},
     );
     return _meals(response.data);

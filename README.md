@@ -1,201 +1,99 @@
-# Flutter Recipes Clean Streams
+# Flutter Recipes Clean Streams · Sazón
 
-> **En resumen**  
-> **Stack:** Flutter · Dart · BLoC · Streams · Dio · GetIt  
-> **Funcionalidad:** búsqueda reactiva, debounce, categorías y consumo de API externa.  
-> **Código principal:** `flutter_recipes_clean_streams/lib/features/recipes/` y `flutter_recipes_clean_streams/test/`.  
-> **Pruebas:** ejecución no verificada.
+Aplicación Flutter para descubrir recetas de TheMealDB, buscar por nombre y consultar ingredientes e instrucciones. Organizada por funcionalidades con Clean Architecture, BLoC y búsqueda reactiva cancelable.
 
-Aplicación móvil desarrollada con Flutter y Dart para descubrir y buscar recetas, utilizando principios de Clean Architecture, BLoC/Streams, inyección de dependencias e integración con una API REST.
+## Funcionalidades
 
-## 📱 Descripción general
+- Inicio con recetas aleatorias, sin duplicados y con tolerancia a fallos parciales.
+- Búsqueda por nombre desde dos caracteres, con debounce de 350 ms, cancelación HTTP e invalidación inmediata de respuestas anteriores.
+- Categorías, listas por categoría y caché durante la vida de la pantalla.
+- Detalle con ingredientes, medidas y pasos de preparación.
+- Estados de carga, resultados vacíos, imágenes alternativas y reintentos de errores.
+- Diseño adaptable; navegación y contenido probados con widgets a 320, 800 y 1280 px.
 
-Flutter Recipes Clean Streams es una aplicación centrada en el descubrimiento de recetas, la separación de responsabilidades y el procesamiento reactivo de búsquedas.
+## Tecnologías y arquitectura
 
-El proyecto integra la API de TheMealDB y procesa la entrada del usuario mediante un flujo con debounce antes de llegar a las capas de aplicación y datos.
-
-## 🏗️ Arquitectura
-
-```text
-Presentación
-     ↓
-BLoC / Streams
-     ↓
-Caso de uso
-     ↓
-Repositorio
-     ↓
-Fuente de datos remota
-     ↓
-Dio
-     ↓
-API de TheMealDB
-```
-
-La estructura separa interfaz, lógica de negocio, reglas de dominio y acceso a servicios externos.
-
-## 🚀 Funcionalidades
-
-- Descubrimiento de recetas.
-- Búsqueda de recetas.
-- Búsqueda reactiva con Streams.
-- Debounce de la búsqueda.
-- Integración con API REST.
-- Interfaz adaptable.
-- Gestión de estado con BLoC.
-- Repository Pattern.
-- Capa de casos de uso.
-- Inyección de dependencias.
-- Manejo de errores y estados de carga.
-- Pruebas unitarias y de aplicación.
-
-## 🔎 Búsqueda reactiva
-
-El proyecto utiliza Streams para procesar la entrada de búsqueda:
+Flutter, Dart, flutter_bloc, Dio, GetIt y Equatable. El dominio no depende de Dio ni de widgets. Los modelos interpretan TheMealDB; los repositorios convierten excepciones en fallos de aplicación. GetIt crea un BLoC por pantalla y comparte el cliente HTTP.
 
 ```text
-Entrada del usuario
-    ↓
-Stream
-    ↓
-Debounce
-    ↓
-BLoC
-    ↓
-Caso de uso
-    ↓
-Repositorio
-    ↓
-Fuente de datos remota
-    ↓
-API de TheMealDB
+flutter_recipes_clean_streams/
+├── lib/
+│   ├── core/                  # Errores, HTTP, tema y utilidades
+│   ├── injection/             # Registro y liberación de dependencias
+│   ├── features/recipes/
+│   │   ├── data/              # Fuentes remotas, modelos y repositorio
+│   │   ├── domain/            # Entidades, contratos y casos de uso
+│   │   └── presentation/      # BLoC, eventos, estados, páginas y widgets
+│   └── main.dart
+├── test/                      # Pruebas unitarias y de widgets sin API externa
+└── integration_test/          # Recorrido de aplicación con repositorio simulado
 ```
 
-El debounce reduce solicitudes innecesarias mientras el usuario escribe y mejora la eficiencia de la búsqueda.
+Cada entrada de búsqueda invalida la operación anterior. Un temporizador espera 350 ms antes de consultar el caso de uso; la señal de cancelación se traduce a un `CancelToken` de Dio en datos. Una respuesta obsoleta no puede publicar resultados ni errores. La carga del inicio y la búsqueda mantienen estados independientes.
 
-## 🧩 Tecnologías
+El cliente usa HTTPS y timeouts de conexión/envío de 15 s y recepción de 20 s. Las solicitudes no registran datos sensibles y los errores de transporte no exponen mensajes internos al usuario.
 
-| Tecnología | Uso |
-|---|---|
-| Flutter | Desarrollo de la aplicación |
-| Dart | Lenguaje de programación |
-| flutter_bloc | Gestión de estado |
-| BLoC | Lógica reactiva |
-| Streams | Procesamiento reactivo |
-| Dio | Cliente HTTP |
-| GetIt | Inyección de dependencias |
-| Equatable | Comparación de valores |
-| TheMealDB API | Datos de recetas |
-| Clean Architecture | Organización de la aplicación |
-| Repository Pattern | Abstracción de datos |
+## Instalación y ejecución
 
-## 🌐 Integración con la API
-
-La aplicación consume la API pública de TheMealDB para obtener información de recetas.
-
-La comunicación se encuentra aislada de la presentación mediante las capas de repositorio y fuente de datos.
-
-## ⚡ Gestión de estado
-
-BLoC coordina el flujo entre presentación y las capas de dominio y datos.
-
-Estados habituales:
-
-- Inicial.
-- Cargando.
-- Resultados exitosos.
-- Sin resultados.
-- Error.
-
-La interfaz reacciona a los cambios de estado sin controlar directamente las operaciones de la API.
-
-## 💉 Inyección de dependencias
-
-`GetIt` registra y resuelve las dependencias de la aplicación, centralizando su configuración y reduciendo el acoplamiento.
-
-## 📱 Interfaz adaptable
-
-La aplicación está preparada para diferentes tamaños de pantalla, incluyendo dispositivos móviles, tabletas y escritorio.
-
-## 🧪 Pruebas
-
-El proyecto incluye pruebas de componentes y funcionalidades principales.
-
-La separación proporcionada por Clean Architecture, repositorios y casos de uso facilita las pruebas independientes.
-
-## ⚙️ Instalación
-
-### 1. Clonar el repositorio
+Requiere Flutter con Dart 3.13.4 o compatible con el rango de `pubspec.yaml`. Entorno de validación: Flutter 3.47.5 y Dart 3.13.4. Conserva `pubspec.lock` para reproducir dependencias.
 
 ```bash
 git clone https://github.com/MiguelArbelaez0/FLUTTER_RECIPES_CLEAN_STREAMS.git
 cd FLUTTER_RECIPES_CLEAN_STREAMS/flutter_recipes_clean_streams
-```
-
-### 2. Instalar dependencias
-
-```bash
 flutter pub get
+flutter run -d chrome
+# O selecciona un dispositivo Android con flutter devices:
+flutter run -d <device-id>
 ```
 
-### 3. Ejecutar
+No requiere credenciales privadas: la ruta del cliente usa el acceso público de ejemplo de TheMealDB. Las imágenes y recetas requieren conexión. No hay assets de recetas locales.
+
+## Pruebas y compilaciones
+
+Ejecuta siempre desde `flutter_recipes_clean_streams/`:
 
 ```bash
-flutter run
+dart format lib test integration_test
+flutter analyze
+flutter test
+flutter test --coverage
+flutter test integration_test/app_test.dart -d <device-id>
+flutter build web
+flutter build apk --debug
 ```
 
-## 📂 Estructura
+Las pruebas cubren JSON y datos inválidos, casos de uso, repositorios con adaptadores HTTP simulados, timeouts, debounce con reloj de pruebas, cancelación real del transporte, búsquedas consecutivas, respuestas obsoletas, reintentos de categorías, descubrimiento, marcas temporales de recetas y navegación al detalle. No requieren una API externa activa. La prueba de integración también utiliza datos simulados y no certifica la disponibilidad del servicio.
 
-```text
-lib/
-├── core/
-├── data/
-├── domain/
-└── presentation/
+Para Android se necesita un SDK con las licencias correspondientes y un JDK compatible con Gradle 8.14/AGP 8.11.1. La selección de Java puede aislarse por proceso con `scripts/flutter-local.ps1` desde la raíz del repositorio:
+```powershell
+./scripts/flutter-local.ps1 -JdkPath 'C:/ruta/al/jdk-17' -FlutterArguments @('build', 'apk', '--debug')
 ```
 
-### Presentación
-Pantallas, widgets, BLoC y lógica reactiva de la interfaz.
+El script guarda ajustes ignorados por Git en `.tooling/`, ejecuta Flutter desde la raíz correcta y restaura las variables del proceso. Flutter puede priorizar el JDK de Android Studio sobre `JAVA_HOME`; este script selecciona el JDK indicado sin cambiar la configuración global.
 
-### Dominio
-Entidades, contratos de repositorio y casos de uso.
+## Plataformas
 
-### Datos
-Comunicación con la API, fuentes de datos, modelos e implementaciones de repositorios.
+- Web: compilación release verificada. El inicio y la búsqueda con datos reales se comprobaron manualmente en Chrome mediante capturas. El usuario confirmó que la navegación por categorías y el detalle de recetas funcionan.
+- Android: compilación APK debug verificada con JDK 17. En emulador Android 16/API 36 una comprobación automatizada con el repositorio real verificó descubrimiento, categorías, búsqueda, resultados vacíos, detalle con ingredientes e instrucciones y retorno a inicio. Las pruebas deterministas de integración cubren navegación y recuperación de errores con datos simulados.
+- Widgets: inicio, búsqueda, detalle y retorno probados en tres tamaños de pantalla.
+- iOS, macOS, Linux y Windows: existen carpetas de plataforma; compilación y ejecución no verificadas.
 
-### Core
-Funcionalidades compartidas y utilidades de la aplicación.
+La compilación por sí sola no verifica interacción ni conectividad en un dispositivo. Las comprobaciones manuales en Chrome no constituyen una suite automatizada de navegador. La disponibilidad de TheMealDB sigue siendo intermitente y debe comprobarse al ejecutar la aplicación.
 
-## 🎯 Qué demuestra este proyecto
+## Limitaciones
 
-- Flutter y Dart.
-- BLoC y Streams.
-- Principios de Clean Architecture.
-- Repository Pattern.
-- Diseño mediante casos de uso.
-- Integración con APIs REST.
-- Dio.
-- Inyección de dependencias con GetIt.
-- Debounce de búsquedas.
-- Interfaces adaptables.
-- Manejo de errores y estados.
-- Pruebas.
+- TheMealDB puede devolver información incompleta o en inglés. No se traducen recetas.
+- El servicio externo puede responder con HTTP 522, timeouts o transferencias incompletas. La aplicación muestra errores y permite reintentar; una ejecución satisfactoria no garantiza disponibilidad continua.
+- No hay almacenamiento offline, autenticación, paginación ni biblioteca de favoritos persistente. Los corazones son marcas locales de cada widget y se reinician al recrearlo.
+- El descubrimiento intenta hasta nueve solicitudes para reunir seis recetas distintas; puede mostrar menos si hay duplicados o fallos.
+- Las listas de categorías se conservan solo durante la pantalla y no se persisten en disco.
+- Android conserva el identificador de ejemplo y firma debug; no está preparado para publicar en tiendas. El toolchain muestra avisos de futura retirada de soporte para Gradle/AGP/Kotlin actuales; no se han actualizado indiscriminadamente.
+- Los iconos de lanzamiento son los generados por Flutter.
 
-## 📌 Estado del proyecto
-
-**Proyecto de portafolio terminado.**
-
-Desarrollado para demostrar arquitectura mantenible en Flutter, programación reactiva con Streams/BLoC, integración con APIs, inyección de dependencias y diseño orientado a pruebas.
-
-## 👨‍💻 Autor
+## Autor
 
 **Miguel Arbeláez Vallejo**
 
 Flutter & Dart · Full-Stack · Backend · AI/Data
 
----
-
-## Requisitos y limitaciones
-
-La aplicación Flutter está ubicada en el subdirectorio `flutter_recipes_clean_streams/`, no en la raíz del repositorio. `pubspec.yaml` confirma Dio, BLoC, GetIt y `stream_transform`; el código incluye casos de uso para búsqueda, categorías, detalle y receta aleatoria. No se incluyen resultados de ejecución de pruebas.
-
+[GitHub](https://github.com/MiguelArbelaez0) · [LinkedIn](https://www.linkedin.com/in/miguel-arbelaez-v-57719542b/) · [Repositorio](https://github.com/MiguelArbelaez0/FLUTTER_RECIPES_CLEAN_STREAMS)

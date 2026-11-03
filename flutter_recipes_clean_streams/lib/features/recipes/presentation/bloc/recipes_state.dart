@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/recipe_entity.dart';
 import '../../domain/entities/category_entity.dart';
+import '../../domain/entities/recipe_entity.dart';
 
 enum RecipesStatus { initial, loading, success, failure }
 
@@ -12,11 +12,14 @@ enum CategoriesStatus { initial, loading, success, failure }
 class RecipesState extends Equatable {
   const RecipesState({
     this.status = RecipesStatus.initial,
+    this.searchStatus = RecipesStatus.initial,
     this.recipes = const [],
     this.searchResults = const [],
     this.detailStatus = RecipeDetailStatus.initial,
     this.selectedRecipe,
     this.errorMessage,
+    this.searchErrorMessage,
+    this.categoriesErrorMessage,
     this.categoriesStatus = CategoriesStatus.initial,
     this.categories = const [],
     this.categoryRecipes = const {},
@@ -24,10 +27,12 @@ class RecipesState extends Equatable {
     this.categoryErrors = const {},
   });
   final RecipesStatus status;
+  final RecipesStatus searchStatus;
   final List<RecipeEntity> recipes, searchResults;
   final RecipeDetailStatus detailStatus;
   final RecipeEntity? selectedRecipe;
   final String? errorMessage;
+  final String? searchErrorMessage, categoriesErrorMessage;
   final CategoriesStatus categoriesStatus;
   final List<CategoryEntity> categories;
   final Map<String, List<RecipeEntity>> categoryRecipes;
@@ -35,11 +40,15 @@ class RecipesState extends Equatable {
   final Map<String, String> categoryErrors;
   RecipesState copyWith({
     RecipesStatus? status,
+    RecipesStatus? searchStatus,
     List<RecipeEntity>? recipes,
     List<RecipeEntity>? searchResults,
     RecipeDetailStatus? detailStatus,
     RecipeEntity? selectedRecipe,
     String? errorMessage,
+    String? searchErrorMessage,
+    String? categoriesErrorMessage,
+    bool clearSearchError = false,
     bool clearError = false,
     bool clearSelectedRecipe = false,
     CategoriesStatus? categoriesStatus,
@@ -49,6 +58,7 @@ class RecipesState extends Equatable {
     Map<String, String>? categoryErrors,
   }) => RecipesState(
     status: status ?? this.status,
+    searchStatus: searchStatus ?? this.searchStatus,
     recipes: recipes ?? this.recipes,
     searchResults: searchResults ?? this.searchResults,
     detailStatus: detailStatus ?? this.detailStatus,
@@ -56,6 +66,11 @@ class RecipesState extends Equatable {
         ? null
         : selectedRecipe ?? this.selectedRecipe,
     errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
+    searchErrorMessage: clearSearchError
+        ? null
+        : searchErrorMessage ?? this.searchErrorMessage,
+    categoriesErrorMessage:
+        categoriesErrorMessage ?? this.categoriesErrorMessage,
     categoriesStatus: categoriesStatus ?? this.categoriesStatus,
     categories: categories ?? this.categories,
     categoryRecipes: categoryRecipes ?? this.categoryRecipes,
@@ -65,11 +80,14 @@ class RecipesState extends Equatable {
   @override
   List<Object?> get props => [
     status,
+    searchStatus,
     recipes,
     searchResults,
     detailStatus,
     selectedRecipe,
     errorMessage,
+    searchErrorMessage,
+    categoriesErrorMessage,
     categoriesStatus,
     categories,
     categoryRecipes,

@@ -140,6 +140,14 @@ class _HomePageState extends State<HomePage> {
                                           itemBuilder: (_, _) =>
                                               const CategoryCardSkeleton(),
                                         )
+                                      : state.categories.isEmpty &&
+                                            state.categoriesStatus ==
+                                                CategoriesStatus.success
+                                      ? const Center(
+                                          child: Text(
+                                            'No hay categorías disponibles.',
+                                          ),
+                                        )
                                       : state.categories.isEmpty
                                       ? _CategoryError(
                                           onRetry: () => context
@@ -199,8 +207,10 @@ class _HomePageState extends State<HomePage> {
                               child: _SearchResults(
                                 query: query,
                                 recipes: state.searchResults,
-                                loading: state.status == RecipesStatus.loading,
-                                failed: state.status == RecipesStatus.failure,
+                                loading:
+                                    state.searchStatus == RecipesStatus.loading,
+                                failed:
+                                    state.searchStatus == RecipesStatus.failure,
                                 onClear: () {
                                   _searchController.clear();
                                   context.read<RecipesBloc>().add(
@@ -302,10 +312,11 @@ class _HomePageState extends State<HomePage> {
                                               crossAxisCount: count,
                                               crossAxisSpacing: 14,
                                               mainAxisSpacing: 14,
-                                              childAspectRatio:
-                                                  constraints.maxWidth < 400
-                                                  ? .68
-                                                  : .76,
+                                              mainAxisExtent:
+                                                  310 *
+                                                  MediaQuery.textScalerOf(
+                                                    context,
+                                                  ).scale(1),
                                             ),
                                         itemBuilder: (context, index) =>
                                             RecipeWidget(
@@ -343,6 +354,18 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                 ),
                                 const SizedBox(height: 14),
+                                if (state.status == RecipesStatus.failure)
+                                  _InlineNotice(
+                                    icon: Icons.cloud_off_outlined,
+                                    message: 'No pudimos renovar las recetas.',
+                                    actionLabel: 'Reintentar',
+                                    action: () =>
+                                        context.read<RecipesBloc>().add(
+                                          const LoadRandomRecipes(
+                                            refresh: true,
+                                          ),
+                                        ),
+                                  ),
                                 if (state.status == RecipesStatus.loading &&
                                     state.recipes.isEmpty)
                                   _HorizontalSkeletons()

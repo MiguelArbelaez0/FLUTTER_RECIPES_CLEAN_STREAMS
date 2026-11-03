@@ -1,18 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/error/failures/failure.dart';
+import '../../../../core/utils/request_cancellation.dart';
 import '../../domain/entities/recipe_entity.dart';
 import '../../domain/usecases/get_categories.dart';
 import '../../domain/usecases/get_random_recipe.dart';
-import '../../domain/usecases/get_recipes_by_category.dart';
 import '../../domain/usecases/get_recipe_detail.dart';
+import '../../domain/usecases/get_recipes_by_category.dart';
 import '../../domain/usecases/search_recipes.dart';
 import 'recipes_event.dart';
 import 'recipes_state.dart';
-
-EventTransformer<E> _debounce<E>(Duration duration) =>
-    (events, mapper) => events.debounce(duration).switchMap(mapper);
 
 class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
   static const _randomRecipeTarget = 6;
@@ -38,11 +37,17 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     on<LoadRecipesByCategory>(_loadByCategory);
     on<LoadRandomRecipes>(_loadRandom);
     on<LoadRecipeDetail>(_loadDetail);
-    on<SearchRecipesRequested>(
-      _search,
-      transformer: _debounce(const Duration(milliseconds: 350)),
-    );
+    on<SearchRecipesRequested>(_search);
   }
+  RequestCancellation? _searchCancellation;
+  int _detailVersion = 0;
+
+  @override
+  Future<void> close() {
+    _searchCancellation?.cancel();
+    return super.close();
+  }
+
   final GetRandomRecipe getRandomRecipe;
   final GetRecipeDetail getRecipeDetail;
   final SearchRecipes searchRecipes;
@@ -53,6 +58,7 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     LoadCategories event,
     Emitter<RecipesState> emit,
   ) async {
+    if (state.categoriesStatus == CategoriesStatus.loading) return;
     emit(state.copyWith(categoriesStatus: CategoriesStatus.loading));
     try {
       final categories = await getCategories();
@@ -60,14 +66,13 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
         state.copyWith(
           categoriesStatus: CategoriesStatus.success,
           categories: categories,
-          categoryErrors: const {},
         ),
       );
     } catch (error) {
       emit(
         state.copyWith(
           categoriesStatus: CategoriesStatus.failure,
-          errorMessage: _message(error),
+          categoriesErrorMessage: _message(error),
         ),
       );
     }
@@ -167,6 +172,7 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     LoadRecipeDetail event,
     Emitter<RecipesState> emit,
   ) async {
+    final version = ++_detailVersion;
     emit(
       state.copyWith(
         detailStatus: RecipeDetailStatus.loading,
@@ -175,14 +181,17 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
       ),
     );
     try {
+      final recipe = await getRecipeDetail(event.id);
+      if (emit.isDone || version != _detailVersion) return;
       emit(
         state.copyWith(
           detailStatus: RecipeDetailStatus.success,
-          selectedRecipe: await getRecipeDetail(event.id),
+          selectedRecipe: recipe,
           clearError: true,
         ),
       );
     } catch (error) {
+      if (emit.isDone || version != _detailVersion) return;
       emit(
         state.copyWith(
           detailStatus: RecipeDetailStatus.failure,
@@ -196,25 +205,52 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     SearchRecipesRequested event,
     Emitter<RecipesState> emit,
   ) async {
+    _searchCancellation?.cancel();
+    final cancellation = RequestCancellation();
+    _searchCancellation = cancellation;
     final query = event.query.trim();
     if (query.length < 2) {
-      emit(state.copyWith(searchResults: const [], clearError: true));
-      return;
-    }
-    emit(state.copyWith(status: RecipesStatus.loading, clearError: true));
-    try {
       emit(
         state.copyWith(
-          status: RecipesStatus.success,
-          searchResults: await searchRecipes(query),
-          clearError: true,
+          searchStatus: RecipesStatus.initial,
+          searchResults: const [],
+          clearSearchError: true,
+        ),
+      );
+      return;
+    }
+    emit(
+      state.copyWith(
+        searchStatus: RecipesStatus.loading,
+        searchResults: const [],
+        clearSearchError: true,
+      ),
+    );
+    // Invalidate immediately; debounce delays only the next HTTP request.
+    final ready = Completer<void>();
+    final timer = Timer(const Duration(milliseconds: 350), ready.complete);
+    cancellation.onCancel(() {
+      timer.cancel();
+      if (!ready.isCompleted) ready.complete();
+    });
+    await ready.future;
+    if (cancellation.isCancelled || emit.isDone) return;
+    try {
+      final results = await searchRecipes(query, cancellation: cancellation);
+      if (cancellation.isCancelled || emit.isDone) return;
+      emit(
+        state.copyWith(
+          searchStatus: RecipesStatus.success,
+          searchResults: results,
+          clearSearchError: true,
         ),
       );
     } catch (error) {
+      if (cancellation.isCancelled || emit.isDone) return;
       emit(
         state.copyWith(
-          status: RecipesStatus.failure,
-          errorMessage: _message(error),
+          searchStatus: RecipesStatus.failure,
+          searchErrorMessage: _message(error),
         ),
       );
     }
