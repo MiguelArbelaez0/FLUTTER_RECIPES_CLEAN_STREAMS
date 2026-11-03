@@ -100,6 +100,9 @@ class _RecipeDetails extends StatelessWidget {
                     : Image.network(
                         recipe.imageUrl!,
                         fit: BoxFit.cover,
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : const ColoredBox(color: AppPalette.primarySoft),
                         errorBuilder: (_, _, _) =>
                             const ColoredBox(color: AppPalette.primarySoft),
                       ),
@@ -185,10 +188,13 @@ class _RecipeDetails extends StatelessWidget {
                           ),
                         ),
                         if (ingredient.measure?.isNotEmpty == true)
-                          Text(
-                            ingredient.measure!,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
+                          Flexible(
+                            child: Text(
+                              ingredient.measure!,
+                              textAlign: TextAlign.end,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
                           ),
                       ],
                     ),
@@ -323,7 +329,9 @@ class _SectionHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      Text(title, style: Theme.of(context).textTheme.headlineSmall),
+      Expanded(
+        child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
+      ),
       if (trailing != null) ...[
         const SizedBox(width: 9),
         Text(trailing!, style: Theme.of(context).textTheme.bodyMedium),
@@ -349,6 +357,10 @@ class _DetailError extends StatelessWidget {
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 16),
           FilledButton(onPressed: retry, child: const Text('Reintentar')),
+          TextButton(
+            onPressed: () => Navigator.maybePop(context),
+            child: const Text('Volver'),
+          ),
         ],
       ),
     ),

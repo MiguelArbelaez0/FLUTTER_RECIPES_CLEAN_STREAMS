@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
-
 import 'features/recipes/presentation/pages/routes_app.dart';
-
 import 'injection/injection_container.dart';
 
 Future<void> main() async {
@@ -19,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Recipe Search',
+      title: 'Sazón',
       theme: AppTheme.light,
       onGenerateRoute: Routes.generateRoute,
     );

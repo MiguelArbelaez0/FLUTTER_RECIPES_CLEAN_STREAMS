@@ -40,6 +40,8 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                         : Image.network(
                             recipe.imageUrl!,
                             fit: BoxFit.cover,
+                            loadingBuilder: (_, child, progress) =>
+                                progress == null ? child : _imageFallback(),
                             errorBuilder: (_, _, _) => _imageFallback(),
                           ),
                   ),

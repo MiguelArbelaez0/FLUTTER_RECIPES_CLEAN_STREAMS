@@ -1,5 +1,5 @@
-import '../../domain/entities/recipe_entity.dart';
 import '../../../../core/utils/normalized_text.dart';
+import '../../domain/entities/recipe_entity.dart';
 import 'ingredient_model.dart';
 
 class RecipeModel {
