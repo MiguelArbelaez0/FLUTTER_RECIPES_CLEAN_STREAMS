@@ -1,5 +1,12 @@
 # Flutter Recipes Clean Streams
 
+> **Resumen para evaluación técnica**  
+> **Stack:** Flutter · Dart · BLoC · Streams · Dio · GetIt  
+> **Evidencia:** Demuestra búsqueda reactiva, debounce, categorías y consumo de API externa.  
+> **Código relevante:** Para evaluar: `flutter_recipes_clean_streams/lib/features/recipes/` y `flutter_recipes_clean_streams/test/`.  
+> **Verificación:** revisión estática de repositorio; no equivale a ejecución de tests ni certificación de producción.
+
+
 Aplicación móvil desarrollada con Flutter y Dart para descubrir y buscar recetas, utilizando principios de Clean Architecture, BLoC/Streams, inyección de dependencias e integración con una API REST.
 
 ## 📱 Descripción general
