@@ -123,7 +123,7 @@ La separación proporcionada por Clean Architecture, repositorios y casos de uso
 
 ```bash
 git clone https://github.com/MiguelArbelaez0/FLUTTER_RECIPES_CLEAN_STREAMS.git
-cd FLUTTER_RECIPES_CLEAN_STREAMS
+cd FLUTTER_RECIPES_CLEAN_STREAMS/flutter_recipes_clean_streams
 ```
 
 ### 2. Instalar dependencias
@@ -186,3 +186,11 @@ Desarrollado para demostrar arquitectura mantenible en Flutter, programación re
 **Miguel Arbeláez Vallejo**
 
 Flutter & Dart · Full-Stack · Backend · AI/Data
+
+---
+
+## 🔎 Alcance y verificación documental (2026-11-02)
+
+La aplicación Flutter está ubicada en el subdirectorio `flutter_recipes_clean_streams/`, no en la raíz del repositorio. `pubspec.yaml` confirma Dio, BLoC, GetIt y `stream_transform`; el código incluye casos de uso para búsqueda, categorías, detalle y receta aleatoria. Las pruebas presentes no se ejecutaron.
+
+**Estado de la revisión:** contraste estático entre documentación, estructura y archivos de configuración/código seleccionados. No se ejecutaron compilaciones, pruebas automatizadas, despliegues ni auditorías dinámicas de seguridad. La documentación describe el alcance observado, sin certificar preparación para producción.
