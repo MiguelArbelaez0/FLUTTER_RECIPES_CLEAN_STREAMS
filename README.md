@@ -1,11 +1,10 @@
 # Flutter Recipes Clean Streams
 
-> **Resumen para evaluación técnica**  
+> **En resumen**  
 > **Stack:** Flutter · Dart · BLoC · Streams · Dio · GetIt  
-> **Evidencia:** Demuestra búsqueda reactiva, debounce, categorías y consumo de API externa.  
-> **Código para revisar:** `flutter_recipes_clean_streams/lib/features/recipes/` y `flutter_recipes_clean_streams/test/`.  
-> **Estado:** revisión documental; pruebas y despliegue no verificados.
-
+> **Funcionalidad:** búsqueda reactiva, debounce, categorías y consumo de API externa.  
+> **Código principal:** `flutter_recipes_clean_streams/lib/features/recipes/` y `flutter_recipes_clean_streams/test/`.  
+> **Pruebas:** ejecución no verificada.
 
 Aplicación móvil desarrollada con Flutter y Dart para descubrir y buscar recetas, utilizando principios de Clean Architecture, BLoC/Streams, inyección de dependencias e integración con una API REST.
 
@@ -196,8 +195,7 @@ Flutter & Dart · Full-Stack · Backend · AI/Data
 
 ---
 
-## Estado técnico y limitaciones
+## Requisitos y limitaciones
 
-La aplicación Flutter está ubicada en el subdirectorio `flutter_recipes_clean_streams/`, no en la raíz del repositorio. `pubspec.yaml` confirma Dio, BLoC, GetIt y `stream_transform`; el código incluye casos de uso para búsqueda, categorías, detalle y receta aleatoria. Las pruebas presentes no se ejecutaron.
+La aplicación Flutter está ubicada en el subdirectorio `flutter_recipes_clean_streams/`, no en la raíz del repositorio. `pubspec.yaml` confirma Dio, BLoC, GetIt y `stream_transform`; el código incluye casos de uso para búsqueda, categorías, detalle y receta aleatoria. No se incluyen resultados de ejecución de pruebas.
 
-**Verificación:** análisis estático del repositorio. No se han comprobado aquí compilación, pruebas automatizadas, despliegue ni seguridad dinámica.
