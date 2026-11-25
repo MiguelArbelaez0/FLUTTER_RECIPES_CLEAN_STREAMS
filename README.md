@@ -1,5 +1,9 @@
 # Flutter Recipes Clean Streams · Sazón
 
+> **Estado:** Completado  
+> **Versión:** `1.0.0+1 (pubspec.yaml)`  
+> **Tecnologías:** Flutter · Dart · BLoC · Clean Architecture · Dio · GetIt · TheMealDB
+
 Aplicación Flutter para descubrir recetas de TheMealDB, buscar por nombre y consultar ingredientes e instrucciones. Organizada por funcionalidades con Clean Architecture, BLoC y búsqueda reactiva cancelable.
 
 ## Funcionalidades
